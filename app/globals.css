@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+@theme {
+  --color-masters-green: #1a5c38;
+  --color-masters-green-light: #237a4b;
+  --color-masters-green-dark: #0f3d25;
+  --color-masters-gold: #c9a84c;
+  --color-masters-gold-light: #d4ba6a;
+  --color-masters-cream: #faf8f0;
+  --color-masters-white: #ffffff;
+}
+
+:root {
+  --foreground: #1a1a1a;
+  --background: #faf8f0;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
+}
+
+/* Leaderboard row animation */
+.leaderboard-row {
+  transition: transform 0.4s ease, background-color 0.3s ease;
+}

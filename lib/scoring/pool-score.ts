@@ -1,0 +1,86 @@
+import type { Pick, PlayerScore, CutScore, LeaderboardEntry, TierWithPlayers } from "@/lib/types";
+
+interface MemberWithPicks {
+  memberId: string;
+  displayName: string;
+  picks: Pick[];
+}
+
+/**
+ * Calculate the pool leaderboard.
+ *
+ * For each member, sum up the total strokes of their picked players.
+ * If a player missed the cut, substitute their R3/R4 scores with field averages.
+ */
+export function calculateLeaderboard(
+  members: MemberWithPicks[],
+  tiers: TierWithPlayers[],
+  scores: PlayerScore[],
+  cutScore: CutScore | null
+): LeaderboardEntry[] {
+  const scoreMap = new Map<string, PlayerScore>();
+  for (const s of scores) {
+    scoreMap.set(s.espn_player_id, s);
+  }
+
+  const tierMap = new Map<string, TierWithPlayers>();
+  for (const t of tiers) {
+    tierMap.set(t.id, t);
+  }
+
+  const entries: LeaderboardEntry[] = members.map((member) => {
+    const pickDetails = member.picks.map((pick) => {
+      const tier = tierMap.get(pick.tier_id);
+      const score = scoreMap.get(pick.espn_player_id) ?? null;
+
+      let strokes = 0;
+      if (score) {
+        if (score.made_cut) {
+          // Use actual total strokes
+          strokes = score.total_strokes ?? 0;
+        } else {
+          // Missed cut: R1+R2 actual, R3+R4 = field averages
+          const rounds = (score.rounds as number[] | null) ?? [];
+          const r1 = rounds[0] ?? 0;
+          const r2 = rounds[1] ?? 0;
+          const r3Penalty = cutScore?.sat_field_avg ?? 0;
+          const r4Penalty = cutScore?.sun_field_avg ?? 0;
+          strokes = r1 + r2 + Number(r3Penalty) + Number(r4Penalty);
+        }
+      }
+
+      return {
+        tierNumber: tier?.tier_number ?? 0,
+        tierLabel: tier?.label ?? null,
+        playerName: pick.player_name,
+        espnPlayerId: pick.espn_player_id,
+        score,
+        strokes,
+      };
+    });
+
+    const totalStrokes = pickDetails.reduce((sum, p) => sum + p.strokes, 0);
+
+    return {
+      rank: 0,
+      memberId: member.memberId,
+      displayName: member.displayName,
+      picks: pickDetails.sort((a, b) => a.tierNumber - b.tierNumber),
+      totalStrokes,
+    };
+  });
+
+  // Sort by total strokes ascending (lower is better)
+  entries.sort((a, b) => a.totalStrokes - b.totalStrokes);
+
+  // Assign ranks (handle ties)
+  let currentRank = 1;
+  for (let i = 0; i < entries.length; i++) {
+    if (i > 0 && entries[i].totalStrokes > entries[i - 1].totalStrokes) {
+      currentRank = i + 1;
+    }
+    entries[i].rank = currentRank;
+  }
+
+  return entries;
+}
