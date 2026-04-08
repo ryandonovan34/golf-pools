@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { Suspense, useState, useEffect, useCallback } from "react";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
@@ -29,6 +29,14 @@ interface PoolData {
 }
 
 export default function PoolDetailPage() {
+  return (
+    <Suspense fallback={<div className="space-y-4"><CardSkeleton /><CardSkeleton /></div>}>
+      <PoolDetailContent />
+    </Suspense>
+  );
+}
+
+function PoolDetailContent() {
   const params = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();

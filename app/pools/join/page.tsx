@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -8,6 +8,14 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/Card";
 import { storePoolInfo } from "@/lib/storage";
 
 export default function JoinPoolPage() {
+  return (
+    <Suspense>
+      <JoinPoolContent />
+    </Suspense>
+  );
+}
+
+function JoinPoolContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [inviteCode, setInviteCode] = useState("");
