@@ -11,7 +11,7 @@ import { PicksForm } from "@/components/pools/PicksForm";
 import { PoolLeaderboard } from "@/components/pools/PoolLeaderboard";
 import { CountdownTimer } from "@/components/pools/CountdownTimer";
 import { AdminCodeEntry } from "@/components/pools/AdminCodeEntry";
-import { getPoolToken, getPoolAdminCode, storePoolInfo } from "@/lib/storage";
+import { getPoolToken, getPoolAdminCode, storePoolInfo, removeStoredPool } from "@/lib/storage";
 import type { Tournament, TierWithPlayers, Pick as PickType } from "@/lib/types";
 
 interface PoolData {
@@ -123,6 +123,7 @@ function PoolDetailContent() {
         method: "DELETE",
       });
       if (res.ok) {
+        removeStoredPool(poolId);
         router.push("/");
       }
     } catch {

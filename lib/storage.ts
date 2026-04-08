@@ -33,3 +33,8 @@ export function getPoolAdminCode(poolId: string): string | null {
   const pools = getStoredPools();
   return pools.find((p) => p.poolId === poolId)?.adminCode ?? null;
 }
+
+export function removeStoredPool(poolId: string) {
+  const pools = getStoredPools().filter((p) => p.poolId !== poolId);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(pools));
+}
