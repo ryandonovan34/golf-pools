@@ -56,10 +56,13 @@ export function calculateLeaderboard(
         espnPlayerId: pick.espn_player_id,
         score,
         strokes,
+        isWinner: score?.position === "1" || score?.position === "T1",
       };
     });
 
-    const totalStrokes = pickDetails.reduce((sum, p) => sum + p.strokes, 0);
+    // 3-stroke bonus for each picked player who wins the tournament
+    const winnerBonus = pickDetails.filter((p) => p.isWinner).length * -3;
+    const totalStrokes = pickDetails.reduce((sum, p) => sum + p.strokes, 0) + winnerBonus;
 
     return {
       rank: 0,
@@ -67,6 +70,7 @@ export function calculateLeaderboard(
       displayName: member.displayName,
       picks: pickDetails.sort((a, b) => a.tierNumber - b.tierNumber),
       totalStrokes,
+      winnerBonus,
     };
   });
 

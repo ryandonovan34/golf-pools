@@ -99,8 +99,10 @@ export interface LeaderboardEntry {
     espnPlayerId: string;
     score: PlayerScore | null;
     strokes: number; // actual or penalty strokes
+    isWinner: boolean;
   }[];
   totalStrokes: number;
+  winnerBonus: number;
 }
 
 // localStorage shape

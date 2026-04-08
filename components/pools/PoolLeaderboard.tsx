@@ -120,7 +120,12 @@ export function PoolLeaderboard({
               </td>
               {entry.picks.map((pick, i) => (
                 <td key={i} className="px-3 py-3">
-                  <div className="font-medium">{pick.playerName}</div>
+                  <div className="font-medium">
+                    {pick.playerName}
+                    {pick.isWinner && (
+                      <span className="ml-1 text-masters-gold">🏆</span>
+                    )}
+                  </div>
                   {pick.score && (
                     <div className="text-xs text-gray-500">
                       {pick.score.position && (
@@ -147,7 +152,12 @@ export function PoolLeaderboard({
                 </td>
               ))}
               <td className="px-3 py-3 text-right font-bold text-lg text-masters-green-dark">
-                {entry.totalStrokes > 0 ? entry.totalStrokes : "—"}
+                <div>{entry.totalStrokes > 0 ? entry.totalStrokes : "—"}</div>
+                {entry.winnerBonus < 0 && (
+                  <div className="text-xs font-normal text-masters-gold">
+                    ({entry.winnerBonus} bonus)
+                  </div>
+                )}
               </td>
             </tr>
           ))}

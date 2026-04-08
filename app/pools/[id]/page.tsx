@@ -423,6 +423,47 @@ function PoolDetailContent() {
           />
         </Card>
       )}
+
+      {/* Scoring Rules */}
+      <Card>
+        <details>
+          <summary className="cursor-pointer font-semibold text-masters-green-dark text-lg flex items-center gap-2">
+            <span>📏 Scoring Rules</span>
+          </summary>
+          <div className="mt-4 space-y-4 text-sm text-gray-700">
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-1">Format</h4>
+              <p>This is a <strong>stroke play</strong> pool — lowest total strokes wins.</p>
+            </div>
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-1">How It Works</h4>
+              <ul className="list-disc list-inside space-y-1">
+                <li>Pick <strong>one player from each tier</strong> before the first tee time.</li>
+                <li>Your pool score = the <strong>sum of total strokes</strong> from all your picked players across all 4 rounds.</li>
+                <li>The member with the <strong>lowest combined score wins</strong>.</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-1">Missed Cut Penalty</h4>
+              <p>If one of your picked players <strong>misses the cut</strong>:</p>
+              <ul className="list-disc list-inside space-y-1 mt-1">
+                <li>Their <strong>Rounds 1 & 2</strong> strokes still count as-is.</li>
+                <li>For <strong>Round 3</strong>, they are assigned the <strong>Saturday field average</strong> (average R3 score of all players who made the cut).</li>
+                <li>For <strong>Round 4</strong>, they are assigned the <strong>Sunday field average</strong> (average R4 score of all players who made the cut).</li>
+              </ul>
+              <p className="mt-1 text-gray-500 italic">This means picking a player who misses the cut is costly — you&apos;ll likely get higher-than-average scores for the weekend rounds.</p>
+            </div>
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-1">🏆 Winner Bonus</h4>
+              <p>If one of your picked players <strong>wins the tournament</strong> (finishes in 1st place), you receive a <strong>3-stroke bonus</strong> (3 strokes subtracted from your total).</p>
+            </div>
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-1">Tiebreaker</h4>
+              <p>If two members have the same total strokes, the tie stands (no tiebreaker in this version).</p>
+            </div>
+          </div>
+        </details>
+      </Card>
     </div>
   );
 }
