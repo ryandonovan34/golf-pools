@@ -75,6 +75,13 @@ export async function GET(
         .eq("id", poolId);
     }
 
+    // Fetch all pool members
+    const { data: allMembers } = await supabaseAdmin
+      .from("pool_members")
+      .select("id, display_name, joined_at")
+      .eq("pool_id", poolId)
+      .order("joined_at", { ascending: true });
+
     return NextResponse.json({
       pool: {
         id: pool.id,
@@ -88,6 +95,7 @@ export async function GET(
       tiers,
       member,
       picks,
+      members: allMembers ?? [],
     });
   } catch (error) {
     console.error("Get pool error:", error);

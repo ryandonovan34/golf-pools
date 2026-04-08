@@ -26,6 +26,7 @@ interface PoolData {
   tiers: TierWithPlayers[];
   member: { id: string; displayName: string; participantToken: string } | null;
   picks: PickType[] | null;
+  members: { id: string; display_name: string; joined_at: string }[];
 }
 
 export default function PoolDetailPage() {
@@ -157,7 +158,7 @@ function PoolDetailContent() {
     );
   }
 
-  const { pool, tournament, tiers, member, picks } = data;
+  const { pool, tournament, tiers, member, picks, members } = data;
   const hasPicks = picks && picks.length > 0;
 
   return (
@@ -285,6 +286,25 @@ function PoolDetailContent() {
             storePoolInfo({ poolId, poolName: pool.name, adminCode: code });
           }}
         />
+      )}
+
+      {/* Pool members list (visible to admin before lock) */}
+      {adminCode && !pool.isLocked && members.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>👥 Members ({members.length})</CardTitle>
+          </CardHeader>
+          <ul className="divide-y divide-gray-100">
+            {members.map((m) => (
+              <li key={m.id} className="flex items-center justify-between py-2">
+                <span className="font-medium text-gray-900">{m.display_name}</span>
+                <span className="text-xs text-gray-400">
+                  Joined {new Date(m.joined_at).toLocaleDateString()}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </Card>
       )}
 
       {/* Countdown to first tee time */}
