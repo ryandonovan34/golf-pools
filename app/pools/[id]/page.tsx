@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -31,6 +31,7 @@ interface PoolData {
 export default function PoolDetailPage() {
   const params = useParams();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const poolId = params.id as string;
 
   const [data, setData] = useState<PoolData | null>(null);
@@ -38,6 +39,7 @@ export default function PoolDetailPage() {
   const [error, setError] = useState("");
   const [adminCode, setAdminCode] = useState<string | null>(null);
   const [locking, setLocking] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [editing, setEditing] = useState(false);
 
   // Resolve token once from URL or localStorage
@@ -101,6 +103,24 @@ export default function PoolDetailPage() {
       // ignore
     } finally {
       setLocking(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!adminCode) return;
+    if (!confirm("Are you sure you want to delete this pool? This cannot be undone.")) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/pools/${poolId}?adminCode=${adminCode}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        router.push("/");
+      }
+    } catch {
+      // ignore
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -183,13 +203,42 @@ export default function PoolDetailPage() {
                 Lock the pool to prevent new picks from being submitted.
               </p>
             </div>
+            <div className="flex gap-2">
+              <Button
+                variant="danger"
+                size="sm"
+                loading={locking}
+                onClick={handleLock}
+              >
+                🔒 Lock Pool
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                loading={deleting}
+                onClick={handleDelete}
+              >
+                🗑️ Delete
+              </Button>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* Admin controls (locked pool - delete only) */}
+      {adminCode && pool.isLocked && (
+        <Card className="border-amber-200 bg-amber-50">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-semibold text-amber-800">Admin Controls</p>
+            </div>
             <Button
-              variant="danger"
+              variant="outline"
               size="sm"
-              loading={locking}
-              onClick={handleLock}
+              loading={deleting}
+              onClick={handleDelete}
             >
-              🔒 Lock Pool
+              🗑️ Delete Pool
             </Button>
           </div>
         </Card>

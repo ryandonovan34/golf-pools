@@ -118,6 +118,10 @@ export default function CreatePoolPage() {
     }
   }
 
+  const inviteLink = result
+    ? `${typeof window !== "undefined" ? window.location.origin : ""}/pools/join?code=${result.inviteCode}`
+    : "";
+
   // Success screen
   if (result) {
     return (
@@ -130,12 +134,18 @@ export default function CreatePoolPage() {
             </h2>
             <div className="space-y-4">
               <div className="bg-masters-green/5 rounded-lg p-4">
+                <p className="text-sm text-gray-500 mb-1">Invite Link</p>
+                <p className="text-sm font-mono text-masters-green break-all">
+                  {inviteLink}
+                </p>
+                <p className="text-xs text-gray-500 mt-2">
+                  Share this link with friends so they can join your pool
+                </p>
+              </div>
+              <div className="bg-masters-green/5 rounded-lg p-4">
                 <p className="text-sm text-gray-500 mb-1">Invite Code</p>
                 <p className="text-3xl font-mono font-bold text-masters-green tracking-widest">
                   {result.inviteCode}
-                </p>
-                <p className="text-xs text-gray-500 mt-2">
-                  Share this code with friends so they can join your pool
                 </p>
               </div>
               <div className="bg-amber-50 rounded-lg p-4">
@@ -151,6 +161,14 @@ export default function CreatePoolPage() {
             <div className="flex flex-col gap-3">
               <Button onClick={() => router.push(`/pools/${result.poolId}`)}>
                 Go to Pool →
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  navigator.clipboard.writeText(inviteLink);
+                }}
+              >
+                📋 Copy Invite Link
               </Button>
               <Button
                 variant="outline"

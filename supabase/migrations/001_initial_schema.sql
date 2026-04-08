@@ -83,7 +83,7 @@ values (
   '401811941',
   'The Masters 2026',
   'Augusta National Golf Club',
-  '2026-04-09T12:00:00Z',
+  '2026-04-09T11:40:00Z',
   '2026-04-12T21:00:00Z',
   'upcoming'
 );
@@ -125,3 +125,6 @@ create policy "Service update cut_score" on cut_score for update using (true);
 
 -- Update policy for pools (lock)
 create policy "Public update pools" on pools for update using (true);
+
+-- Delete policy for pools (admin delete)
+create policy "Public delete pools" on pools for delete using (true);

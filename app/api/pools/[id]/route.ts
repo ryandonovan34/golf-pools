@@ -143,3 +143,58 @@ export async function PATCH(
     );
   }
 }
+
+// DELETE pool (requires admin code)
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id: poolId } = await params;
+    const { searchParams } = new URL(request.url);
+    const adminCode = searchParams.get("adminCode");
+
+    if (!adminCode) {
+      return NextResponse.json(
+        { error: "Admin code is required" },
+        { status: 400 }
+      );
+    }
+
+    // Verify admin code
+    const { data: pool } = await supabaseAdmin
+      .from("pools")
+      .select("id, admin_code")
+      .eq("id", poolId)
+      .single();
+
+    if (!pool || pool.admin_code !== adminCode) {
+      return NextResponse.json(
+        { error: "Invalid admin code" },
+        { status: 403 }
+      );
+    }
+
+    // Cascade delete handles tiers, tier_players, pool_members, picks
+    const { error } = await supabaseAdmin
+      .from("pools")
+      .delete()
+      .eq("id", poolId);
+
+    if (error) {
+      console.error("Delete pool error:", error);
+      return NextResponse.json(
+        { error: "Failed to delete pool" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Delete pool error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
