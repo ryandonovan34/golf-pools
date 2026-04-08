@@ -468,6 +468,37 @@ function PoolDetailContent() {
         </Card>
       )}
 
+      {/* Player Tiers */}
+      <Card>
+        <details className="group">
+          <summary className="cursor-pointer font-semibold text-masters-green-dark text-lg flex items-center gap-2 list-none [&::-webkit-details-marker]:hidden">
+            <svg className="w-4 h-4 transition-transform group-open:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+            <span>⛳ Player Tiers</span>
+          </summary>
+          <div className="mt-4 space-y-4">
+            {tiers
+              .sort((a, b) => a.tier_number - b.tier_number)
+              .map((tier) => (
+                <div key={tier.id}>
+                  <h4 className="font-semibold text-gray-900 mb-2">
+                    {tier.label || `Tier ${tier.tier_number}`}
+                  </h4>
+                  <div className="flex flex-wrap gap-2">
+                    {tier.players.map((player) => (
+                      <span
+                        key={player.id}
+                        className="inline-block bg-masters-green/10 text-masters-green-dark text-sm font-medium rounded-full px-3 py-1"
+                      >
+                        {player.player_name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+          </div>
+        </details>
+      </Card>
+
       {/* Scoring Rules */}
       <Card>
         <details className="group">
