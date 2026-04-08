@@ -427,7 +427,8 @@ function PoolDetailContent() {
       {/* Scoring Rules */}
       <Card>
         <details>
-          <summary className="cursor-pointer font-semibold text-masters-green-dark text-lg flex items-center gap-2">
+          <summary className="cursor-pointer font-semibold text-masters-green-dark text-lg flex items-center gap-2 [&>svg]:open:rotate-90">
+            <svg className="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
             <span>📏 Scoring Rules</span>
           </summary>
           <div className="mt-4 space-y-4 text-sm text-gray-700">
