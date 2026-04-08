@@ -122,6 +122,10 @@ export default function CreatePoolPage() {
     ? `${typeof window !== "undefined" ? window.location.origin : ""}/pools/join?code=${result.inviteCode}`
     : "";
 
+  const inviteMessage = result
+    ? `⛳ Join my golf pool "${poolName}" for ${selectedTournament?.name ?? "the tournament"}! Pick your players and let's see who wins.\n\n${inviteLink}`
+    : "";
+
   // Success screen
   if (result) {
     return (
@@ -165,10 +169,10 @@ export default function CreatePoolPage() {
               <Button
                 variant="outline"
                 onClick={() => {
-                  navigator.clipboard.writeText(inviteLink);
+                  navigator.clipboard.writeText(inviteMessage);
                 }}
               >
-                📋 Copy Invite Link
+                📋 Copy Invite Message
               </Button>
               <Button
                 variant="outline"

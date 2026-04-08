@@ -214,6 +214,17 @@ function PoolDetailContent() {
             </div>
             <div className="flex gap-2">
               <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const link = `${window.location.origin}/pools/join?code=${pool.inviteCode}`;
+                  const msg = `⛳ Join my golf pool "${pool.name}" for ${tournament.name}! Pick your players and let's see who wins.\n\n${link}`;
+                  navigator.clipboard.writeText(msg);
+                }}
+              >
+                📋 Copy Invite
+              </Button>
+              <Button
                 variant="danger"
                 size="sm"
                 loading={locking}
@@ -241,14 +252,26 @@ function PoolDetailContent() {
             <div>
               <p className="font-semibold text-amber-800">Admin Controls</p>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              loading={deleting}
-              onClick={handleDelete}
-            >
-              🗑️ Delete Pool
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const link = `${window.location.origin}/pools/join?code=${pool.inviteCode}`;
+                  navigator.clipboard.writeText(link);
+                }}
+              >
+                📋 Copy Invite Link
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                loading={deleting}
+                onClick={handleDelete}
+              >
+                🗑️ Delete Pool
+              </Button>
+            </div>
           </div>
         </Card>
       )}
