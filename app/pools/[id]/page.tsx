@@ -361,6 +361,7 @@ export default function PoolDetailPage() {
           </CardHeader>
           <PoolLeaderboard
             poolId={poolId}
+            espnEventId={tournament.espn_event_id}
             currentMemberId={member?.id}
           />
         </Card>

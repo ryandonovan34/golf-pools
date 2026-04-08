@@ -1,8 +1,1 @@
-{
-  "crons": [
-    {
-      "path": "/api/espn/leaderboard?eventId=401811941",
-      "schedule": "0 * * * *"
-    }
-  ]
-}
+{}

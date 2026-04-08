@@ -6,18 +6,27 @@ import { LeaderboardSkeleton } from "@/components/ui/LoadingSkeleton";
 
 interface PoolLeaderboardProps {
   poolId: string;
-  refreshInterval?: number; // ms, default 30s
+  espnEventId?: string;
+  refreshInterval?: number; // ms, default 60s
   currentMemberId?: string;
 }
 
 export function PoolLeaderboard({
   poolId,
-  refreshInterval = 30000,
+  espnEventId,
+  refreshInterval = 60000,
   currentMemberId,
 }: PoolLeaderboardProps) {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const refreshScores = useCallback(async () => {
+    // Trigger ESPN score refresh in the background (fire-and-forget)
+    if (espnEventId) {
+      fetch(`/api/espn/leaderboard?eventId=${espnEventId}`).catch(() => {});
+    }
+  }, [espnEventId]);
 
   const fetchLeaderboard = useCallback(async () => {
     try {
@@ -34,10 +43,23 @@ export function PoolLeaderboard({
   }, [poolId]);
 
   useEffect(() => {
-    fetchLeaderboard();
-    const interval = setInterval(fetchLeaderboard, refreshInterval);
-    return () => clearInterval(interval);
-  }, [fetchLeaderboard, refreshInterval]);
+    // On mount: refresh ESPN scores, then fetch pool leaderboard
+    refreshScores();
+    // Small delay so ESPN scores have time to write before we read
+    const initialTimeout = setTimeout(fetchLeaderboard, 2000);
+
+    // Poll: refresh ESPN scores then fetch leaderboard every interval
+    const interval = setInterval(async () => {
+      await refreshScores();
+      // Brief delay for scores to persist before reading
+      setTimeout(fetchLeaderboard, 2000);
+    }, refreshInterval);
+
+    return () => {
+      clearTimeout(initialTimeout);
+      clearInterval(interval);
+    };
+  }, [fetchLeaderboard, refreshScores, refreshInterval]);
 
   if (loading) return <LeaderboardSkeleton />;
 

@@ -7,7 +7,7 @@ A web app for running golf pools among friends. Create a pool for a tournament, 
 - **Create & join pools** — share a 6-character invite code with friends
 - **Tiered player drafts** — admin builds tiers; members pick one player per tier
 - **Auto-lock at tee time** — picks automatically lock at the first tee time (8 AM ET Thursday)
-- **Live leaderboard** — scores pulled from ESPN every 10 minutes via Vercel cron
+- **Live leaderboard** — scores pulled from ESPN via client-side polling whenever someone has the app open
 - **Missed-cut penalty** — players who miss the cut are assigned field-average scores for Rounds 3 & 4
 - **No accounts required** — identity is managed via browser-stored participant tokens
 
@@ -29,7 +29,7 @@ app/
 ├── api/
 │   ├── tournaments/        # GET active tournament
 │   ├── espn/
-│   │   ├── leaderboard/    # Cron-triggered score polling
+│   │   ├── leaderboard/    # ESPN score refresh (client-triggered)
 │   │   └── roster/         # Fetch ESPN field for tier building
 │   └── pools/
 │       ├── create/         # POST new pool
@@ -107,7 +107,6 @@ supabase/
    NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
    SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-   CRON_SECRET=any-random-string
    ```
 
 4. **Run the dev server**
@@ -138,22 +137,10 @@ supabase/
    | `NEXT_PUBLIC_SUPABASE_URL`       | Your Supabase project URL    |
    | `NEXT_PUBLIC_SUPABASE_ANON_KEY`  | Your Supabase anon key       |
    | `SUPABASE_SERVICE_ROLE_KEY`      | Your Supabase service role key |
-   | `CRON_SECRET`                    | A random secret string       |
 
 4. **Deploy** — Vercel will build and deploy automatically
 
-5. **Cron job** — The `vercel.json` file configures a cron job that hits `/api/espn/leaderboard` every 10 minutes during the tournament to poll ESPN for live scores. This works automatically on Vercel's Hobby plan (1 cron) or Pro plan.
-
-   ```json
-   {
-     "crons": [
-       {
-         "path": "/api/espn/leaderboard?eventId=401811941",
-         "schedule": "*/10 * * * *"
-       }
-     ]
-   }
-   ```
+   No cron jobs needed — scores are refreshed via client-side polling whenever someone has the leaderboard open.
 
 ## How It Works
 
@@ -161,6 +148,6 @@ supabase/
 2. **Admin shares the invite code** — a 6-character code friends use to join
 3. **Members join and pick** — one player per tier, editable until first tee time
 4. **Picks auto-lock** — at the tournament start time (8 AM ET Thursday for The Masters)
-5. **Live scoring** — a Vercel cron job polls ESPN every 10 minutes, updates `player_scores` in Supabase
-6. **Leaderboard** — the pool page shows a live leaderboard that auto-refreshes every 30 seconds, with each member's total score computed from their picked players
+5. **Live scoring** — when anyone has the leaderboard open, the browser polls ESPN every 60 seconds and writes updated scores to Supabase
+6. **Leaderboard** — the pool page shows a live leaderboard that auto-refreshes every 60 seconds, with each member's total score computed from their picked players
 

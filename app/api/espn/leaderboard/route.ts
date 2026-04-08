@@ -15,15 +15,6 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // If called by Vercel Cron, verify the secret
-  const authHeader = request.headers.get("authorization");
-  const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret && authHeader) {
-    if (authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-  }
-
   try {
     // Fetch leaderboard from ESPN
     const competitors = await fetchLeaderboard(eventId);
