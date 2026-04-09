@@ -16,20 +16,33 @@ export interface ESPNCompetitor {
 
 interface ESPNLineScore {
   value?: number;
+  period?: number;
 }
 
 interface ESPNAthleteStatus {
-  type?: { name?: string };
+  type?: { name?: string; state?: string };
+  position?: { displayName?: string };
+}
+
+interface ESPNStatistic {
+  name: string;
+  value?: number;
+  displayValue?: string;
+}
+
+interface ESPNScore {
+  value?: number;
+  displayValue?: string;
 }
 
 interface ESPNCompetitorRaw {
   id?: string;
   athlete?: { id?: string; displayName?: string };
   status?: ESPNAthleteStatus;
-  score?: string | number;
+  score?: ESPNScore | string | number;
   linescores?: ESPNLineScore[];
   sortOrder?: number;
-  statistics?: { name: string; value: string }[];
+  statistics?: ESPNStatistic[];
 }
 
 /**
@@ -88,16 +101,28 @@ function parseCompetitor(raw: ESPNCompetitorRaw): ESPNCompetitor {
     return null;
   });
 
-  // Total strokes = sum of completed rounds
-  const totalStrokes = rounds.reduce<number>(
-    (sum, r) => sum + (r ?? 0),
-    0
-  );
+  // Total strokes from score object or sum of rounds
+  let totalStrokes = 0;
+  if (raw.score && typeof raw.score === "object" && "value" in raw.score && typeof raw.score.value === "number") {
+    totalStrokes = raw.score.value;
+  } else {
+    totalStrokes = rounds.reduce<number>((sum, r) => sum + (r ?? 0), 0);
+  }
 
-  // Parse to-par from score field
+  // Parse to-par from statistics (most accurate source)
   let toPar = 0;
-  if (typeof raw.score === "number") {
-    toPar = raw.score;
+  const scoreToParStat = (raw.statistics ?? []).find((s) => s.name === "scoreToPar");
+  if (scoreToParStat && typeof scoreToParStat.value === "number") {
+    toPar = scoreToParStat.value;
+  } else if (raw.score && typeof raw.score === "object" && "displayValue" in raw.score) {
+    // Fallback: parse from score.displayValue
+    const dv = raw.score.displayValue ?? "";
+    if (dv === "E") {
+      toPar = 0;
+    } else {
+      const parsed = parseInt(dv, 10);
+      if (!isNaN(parsed)) toPar = parsed;
+    }
   } else if (typeof raw.score === "string") {
     if (raw.score === "E") {
       toPar = 0;
@@ -107,9 +132,11 @@ function parseCompetitor(raw: ESPNCompetitorRaw): ESPNCompetitor {
     }
   }
 
-  // Position from sortOrder or fallback
+  // Position from status.position.displayName (e.g. "T9", "1")
   let position = "";
-  if (raw.sortOrder) {
+  if (raw.status?.position?.displayName) {
+    position = raw.status.position.displayName;
+  } else if (raw.sortOrder) {
     position = String(raw.sortOrder);
   }
   if (!madeCut) {
