@@ -131,13 +131,12 @@ export function PoolLeaderboard({
                       {pick.score.position && (
                         <span className="mr-1">{pick.score.position}</span>
                       )}
-                      <span>
+                      <span className={pick.score.to_par !== null && pick.score.to_par < 0 ? "text-red-600 font-semibold" : pick.score.to_par !== null && pick.score.to_par > 0 ? "text-gray-600" : "font-semibold"}>
                         ({pick.score.to_par === 0
                           ? "E"
-                          : pick.score.to_par && pick.score.to_par > 0
+                          : pick.score.to_par !== null && pick.score.to_par > 0
                           ? `+${pick.score.to_par}`
-                          : pick.score.to_par}
-                        )
+                          : pick.score.to_par})
                       </span>
                       {!pick.score.made_cut && (
                         <span className="ml-1 text-red-500 font-semibold">
@@ -146,13 +145,18 @@ export function PoolLeaderboard({
                       )}
                     </div>
                   )}
-                  <div className="text-xs text-gray-400">
-                    {pick.strokes > 0 ? `${pick.strokes} strokes` : "—"}
-                  </div>
                 </td>
               ))}
-              <td className="px-3 py-3 text-right font-bold text-lg text-masters-green-dark">
-                <div>{entry.totalStrokes > 0 ? entry.totalStrokes : "—"}</div>
+              <td className="px-3 py-3 text-right font-bold text-lg">
+                <div className={entry.totalToPar !== null && entry.totalToPar < 0 ? "text-red-600" : "text-masters-green-dark"}>
+                  {entry.totalToPar !== null
+                    ? entry.totalToPar === 0
+                      ? "E"
+                      : entry.totalToPar > 0
+                      ? `+${entry.totalToPar}`
+                      : entry.totalToPar
+                    : "—"}
+                </div>
                 {entry.winnerBonus < 0 && (
                   <div className="text-xs font-normal text-masters-gold">
                     ({entry.winnerBonus} bonus)

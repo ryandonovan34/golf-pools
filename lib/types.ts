@@ -99,9 +99,11 @@ export interface LeaderboardEntry {
     espnPlayerId: string;
     score: PlayerScore | null;
     strokes: number; // actual or penalty strokes
+    toPar: number | null;
     isWinner: boolean;
   }[];
   totalStrokes: number;
+  totalToPar: number | null;
   winnerBonus: number;
 }
 
