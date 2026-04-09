@@ -80,14 +80,25 @@ export function calculateLeaderboard(
     };
   });
 
-  // Sort by total strokes ascending (lower is better)
-  entries.sort((a, b) => a.totalStrokes - b.totalStrokes);
+  // Sort by totalToPar ascending (lower/more negative is better)
+  // Fall back to totalStrokes if toPar is not available
+  entries.sort((a, b) => {
+    const aScore = a.totalToPar ?? a.totalStrokes;
+    const bScore = b.totalToPar ?? b.totalStrokes;
+    return aScore - bScore;
+  });
 
   // Assign ranks (handle ties)
   let currentRank = 1;
   for (let i = 0; i < entries.length; i++) {
-    if (i > 0 && entries[i].totalStrokes > entries[i - 1].totalStrokes) {
-      currentRank = i + 1;
+    if (i > 0) {
+      const prev = entries[i - 1];
+      const curr = entries[i];
+      const prevScore = prev.totalToPar ?? prev.totalStrokes;
+      const currScore = curr.totalToPar ?? curr.totalStrokes;
+      if (currScore > prevScore) {
+        currentRank = i + 1;
+      }
     }
     entries[i].rank = currentRank;
   }
