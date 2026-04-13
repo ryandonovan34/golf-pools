@@ -170,7 +170,7 @@ function PoolDetailContent() {
   const { pool, tournament, tiers, member, picks, members } = data;
   const hasPicks = picks && picks.length > 0;
   const isPastEndDate = tournament.end_date
-    ? new Date() > new Date(tournament.end_date + "T23:59:59")
+    ? new Date() > new Date(tournament.end_date)
     : false;
   const isComplete = tournament.status === "complete" || isPastEndDate;
 
@@ -191,7 +191,7 @@ function PoolDetailContent() {
               <h1 className="text-2xl font-bold text-masters-green-dark">
                 {pool.name}
               </h1>
-              <StatusBadge status={tournament.status} />
+              <StatusBadge status={isComplete ? "complete" : tournament.status} />
             </div>
             <p className="text-gray-600">
               {tournament.name} • {tournament.course}
