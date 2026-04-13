@@ -96,6 +96,15 @@ function PoolDetailContent() {
     if (poolId) fetchPool();
   }, [poolId, fetchPool]);
 
+  // Re-fetch pool data after a delay to pick up any tournament status changes
+  // from the ESPN refresh triggered by the leaderboard component
+  useEffect(() => {
+    if (data && data.tournament.status !== "complete" && data.pool.isLocked) {
+      const statusRefresh = setTimeout(fetchPool, 5000);
+      return () => clearTimeout(statusRefresh);
+    }
+  }, [data, fetchPool]);
+
   async function handleLock() {
     if (!adminCode) return;
     setLocking(true);

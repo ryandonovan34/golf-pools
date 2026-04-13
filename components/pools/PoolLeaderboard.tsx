@@ -47,15 +47,14 @@ export function PoolLeaderboard({
   useEffect(() => {
     const isComplete = tournamentStatus === "complete";
 
-    // On mount: refresh ESPN scores, then fetch pool leaderboard
-    if (!isComplete) {
-      refreshScores();
-    }
+    // Always do one ESPN refresh on mount to ensure status is up-to-date
+    // (the tournament may have just finished since the last poll)
+    refreshScores();
     // Small delay so ESPN scores have time to write before we read
-    const initialTimeout = setTimeout(fetchLeaderboard, isComplete ? 0 : 2000);
+    const initialTimeout = setTimeout(fetchLeaderboard, 2000);
 
     // Poll: refresh ESPN scores then fetch leaderboard every interval
-    // Skip polling if tournament is already complete
+    // Skip ongoing polling if tournament is already complete
     let interval: ReturnType<typeof setInterval> | undefined;
     if (!isComplete) {
       interval = setInterval(async () => {
