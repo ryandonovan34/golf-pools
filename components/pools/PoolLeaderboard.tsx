@@ -9,6 +9,7 @@ interface PoolLeaderboardProps {
   espnEventId?: string;
   refreshInterval?: number; // ms, default 60s
   currentMemberId?: string;
+  tournamentStatus?: string;
 }
 
 export function PoolLeaderboard({
@@ -16,6 +17,7 @@ export function PoolLeaderboard({
   espnEventId,
   refreshInterval = 60000,
   currentMemberId,
+  tournamentStatus,
 }: PoolLeaderboardProps) {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,23 +45,31 @@ export function PoolLeaderboard({
   }, [poolId]);
 
   useEffect(() => {
+    const isComplete = tournamentStatus === "complete";
+
     // On mount: refresh ESPN scores, then fetch pool leaderboard
-    refreshScores();
+    if (!isComplete) {
+      refreshScores();
+    }
     // Small delay so ESPN scores have time to write before we read
-    const initialTimeout = setTimeout(fetchLeaderboard, 2000);
+    const initialTimeout = setTimeout(fetchLeaderboard, isComplete ? 0 : 2000);
 
     // Poll: refresh ESPN scores then fetch leaderboard every interval
-    const interval = setInterval(async () => {
-      await refreshScores();
-      // Brief delay for scores to persist before reading
-      setTimeout(fetchLeaderboard, 2000);
-    }, refreshInterval);
+    // Skip polling if tournament is already complete
+    let interval: ReturnType<typeof setInterval> | undefined;
+    if (!isComplete) {
+      interval = setInterval(async () => {
+        await refreshScores();
+        // Brief delay for scores to persist before reading
+        setTimeout(fetchLeaderboard, 2000);
+      }, refreshInterval);
+    }
 
     return () => {
       clearTimeout(initialTimeout);
-      clearInterval(interval);
+      if (interval) clearInterval(interval);
     };
-  }, [fetchLeaderboard, refreshScores, refreshInterval]);
+  }, [fetchLeaderboard, refreshScores, refreshInterval, tournamentStatus]);
 
   if (loading) return <LeaderboardSkeleton />;
 
@@ -98,11 +108,15 @@ export function PoolLeaderboard({
           </tr>
         </thead>
         <tbody>
-          {entries.map((entry, idx) => (
+          {entries.map((entry, idx) => {
+            const isPoolWinner = tournamentStatus === "complete" && entry.rank === 1;
+            return (
             <tr
               key={entry.memberId}
               className={`leaderboard-row border-b border-gray-100 ${
-                entry.memberId === currentMemberId
+                isPoolWinner
+                  ? "bg-masters-gold/20 ring-2 ring-masters-gold ring-inset"
+                  : entry.memberId === currentMemberId
                   ? "bg-masters-gold/10"
                   : idx % 2 === 0
                   ? "bg-white"
@@ -110,11 +124,14 @@ export function PoolLeaderboard({
               }`}
             >
               <td className="px-3 py-3 font-bold text-masters-green">
-                {entry.rank}
+                {isPoolWinner ? "🏆" : entry.rank}
               </td>
               <td className="px-3 py-3 font-semibold">
                 {entry.displayName}
-                {entry.memberId === currentMemberId && (
+                {isPoolWinner && (
+                  <span className="ml-1 text-xs font-bold text-masters-gold">Winner!</span>
+                )}
+                {!isPoolWinner && entry.memberId === currentMemberId && (
                   <span className="ml-1 text-xs text-masters-gold">(you)</span>
                 )}
               </td>
@@ -164,7 +181,8 @@ export function PoolLeaderboard({
                 )}
               </td>
             </tr>
-          ))}
+          );
+          })}
         </tbody>
       </table>
     </div>

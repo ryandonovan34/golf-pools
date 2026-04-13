@@ -160,6 +160,7 @@ function PoolDetailContent() {
 
   const { pool, tournament, tiers, member, picks, members } = data;
   const hasPicks = picks && picks.length > 0;
+  const isComplete = tournament.status === "complete";
 
   return (
     <div className="space-y-6">
@@ -421,9 +422,9 @@ function PoolDetailContent() {
       {pool.isLocked && member && hasPicks && (
         <Card>
           <CardHeader>
-            <CardTitle>🔒 Your Picks</CardTitle>
+            <CardTitle>{isComplete ? "⛳ Your Picks" : "🔒 Your Picks"}</CardTitle>
             <p className="text-sm text-gray-500 mt-1">
-              Picks are locked. Good luck!
+              {isComplete ? "Here's how your picks finished." : "Picks are locked. Good luck!"}
             </p>
           </CardHeader>
           <div className="space-y-3">
@@ -454,16 +455,28 @@ function PoolDetailContent() {
         </Card>
       )}
 
+      {/* Winner banner */}
+      {isComplete && pool.isLocked && (
+        <Card className="border-masters-gold bg-gradient-to-r from-masters-gold/10 via-white to-masters-gold/10">
+          <div className="text-center py-2">
+            <p className="text-3xl mb-1">🏆</p>
+            <p className="text-lg font-bold text-masters-green-dark">Tournament Complete</p>
+            <p className="text-sm text-gray-600">Final results are in — see the leaderboard below.</p>
+          </div>
+        </Card>
+      )}
+
       {/* Leaderboard */}
       {pool.isLocked && (
         <Card>
           <CardHeader>
-            <CardTitle>🏆 Pool Leaderboard</CardTitle>
+            <CardTitle>{isComplete ? "🏆 Final Results" : "🏆 Pool Leaderboard"}</CardTitle>
           </CardHeader>
           <PoolLeaderboard
             poolId={poolId}
             espnEventId={tournament.espn_event_id}
             currentMemberId={member?.id}
+            tournamentStatus={tournament.status}
           />
         </Card>
       )}
