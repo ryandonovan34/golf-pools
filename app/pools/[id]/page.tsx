@@ -169,7 +169,10 @@ function PoolDetailContent() {
 
   const { pool, tournament, tiers, member, picks, members } = data;
   const hasPicks = picks && picks.length > 0;
-  const isComplete = tournament.status === "complete";
+  const isPastEndDate = tournament.end_date
+    ? new Date() > new Date(tournament.end_date + "T23:59:59")
+    : false;
+  const isComplete = tournament.status === "complete" || isPastEndDate;
 
   return (
     <div className="space-y-6">
@@ -485,7 +488,7 @@ function PoolDetailContent() {
             poolId={poolId}
             espnEventId={tournament.espn_event_id}
             currentMemberId={member?.id}
-            tournamentStatus={tournament.status}
+            tournamentStatus={isComplete ? "complete" : tournament.status}
           />
         </Card>
       )}
