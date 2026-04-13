@@ -11,12 +11,32 @@ import type { StoredPoolInfo, Tournament } from "@/lib/types";
 
 export default function HomePage() {
   const [storedPools, setStoredPools] = useState<StoredPoolInfo[]>([]);
+  const [poolTournaments, setPoolTournaments] = useState<Record<string, Tournament>>({});
   const [tournament, setTournament] = useState<Tournament | null>(null);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    setStoredPools(getStoredPools());
+    const pools = getStoredPools();
+    setStoredPools(pools);
+
+    // Fetch tournament data for each stored pool
+    pools.forEach((pool) => {
+      fetch(`/api/pools/${pool.poolId}`)
+        .then((res) => {
+          if (!res.ok) throw new Error("API error");
+          return res.json();
+        })
+        .then((data) => {
+          if (data.tournament) {
+            setPoolTournaments((prev) => ({
+              ...prev,
+              [pool.poolId]: data.tournament,
+            }));
+          }
+        })
+        .catch(() => {});
+    });
 
     // Fetch the first tournament for the countdown
     fetch("/api/tournaments")
@@ -29,6 +49,17 @@ export default function HomePage() {
       })
       .catch(() => {});
   }, []);
+
+  const isPoolComplete = (poolId: string) => {
+    const t = poolTournaments[poolId];
+    if (!t) return false;
+    if (t.status === "complete") return true;
+    if (t.end_date && new Date() > new Date(t.end_date)) return true;
+    return false;
+  };
+
+  const activePools = storedPools.filter((p) => !isPoolComplete(p.poolId));
+  const pastPools = storedPools.filter((p) => isPoolComplete(p.poolId));
 
   return (
     <div className="space-y-10">
@@ -80,32 +111,75 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* User's pools */}
-      {mounted && storedPools.length > 0 && (
+      {/* User's active pools */}
+      {mounted && activePools.length > 0 && (
         <section>
           <h2 className="text-2xl font-bold text-masters-green-dark mb-4">
             Your Pools
           </h2>
           <div className="grid gap-4 sm:grid-cols-2">
-            {storedPools.map((pool) => (
-              <Link key={pool.poolId} href={`/pools/${pool.poolId}`}>
-                <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-                  <CardHeader>
-                    <CardTitle>{pool.poolName}</CardTitle>
-                  </CardHeader>
-                  <div className="flex items-center gap-2">
-                    {pool.adminCode && (
-                      <span className="text-xs bg-masters-gold/20 text-masters-green-dark rounded-full px-2 py-0.5 font-semibold">
-                        Admin
+            {activePools.map((pool) => {
+              const t = poolTournaments[pool.poolId];
+              return (
+                <Link key={pool.poolId} href={`/pools/${pool.poolId}`}>
+                  <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                    <CardHeader>
+                      <CardTitle>{pool.poolName}</CardTitle>
+                    </CardHeader>
+                    <div className="flex items-center gap-2">
+                      {pool.adminCode && (
+                        <span className="text-xs bg-masters-gold/20 text-masters-green-dark rounded-full px-2 py-0.5 font-semibold">
+                          Admin
+                        </span>
+                      )}
+                      {t && <StatusBadge status={t.status} />}
+                      <span className="text-sm text-gray-500">
+                        Click to view →
                       </span>
-                    )}
-                    <span className="text-sm text-gray-500">
-                      Click to view →
-                    </span>
-                  </div>
-                </Card>
-              </Link>
-            ))}
+                    </div>
+                  </Card>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* Past pools */}
+      {mounted && pastPools.length > 0 && (
+        <section>
+          <h2 className="text-2xl font-bold text-gray-500 mb-4">
+            Past Pools
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {pastPools.map((pool) => {
+              const t = poolTournaments[pool.poolId];
+              return (
+                <Link key={pool.poolId} href={`/pools/${pool.poolId}`}>
+                  <Card className="hover:shadow-lg transition-shadow cursor-pointer opacity-75">
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle>{pool.poolName}</CardTitle>
+                        <StatusBadge status="complete" />
+                      </div>
+                    </CardHeader>
+                    <div className="flex items-center gap-2">
+                      {pool.adminCode && (
+                        <span className="text-xs bg-masters-gold/20 text-masters-green-dark rounded-full px-2 py-0.5 font-semibold">
+                          Admin
+                        </span>
+                      )}
+                      {t && (
+                        <span className="text-sm text-gray-500">{t.name}</span>
+                      )}
+                      <span className="text-sm text-gray-400 ml-auto">
+                        View results →
+                      </span>
+                    </div>
+                  </Card>
+                </Link>
+              );
+            })}
           </div>
         </section>
       )}
