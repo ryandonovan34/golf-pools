@@ -244,6 +244,7 @@ export default function CreatePoolPage() {
           </CardHeader>
           {selectedTournament && (
             <TierBuilder
+              key={selectedTournament.espn_event_id}
               eventId={selectedTournament.espn_event_id}
               tiers={tiers}
               onChange={setTiers}

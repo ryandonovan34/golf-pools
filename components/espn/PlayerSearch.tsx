@@ -23,7 +23,6 @@ export function PlayerSearch({
   const [error, setError] = useState("");
 
   const loadPlayers = useCallback(async () => {
-    if (allPlayers.length > 0) return;
     setLoading(true);
     setError("");
     try {
@@ -36,7 +35,7 @@ export function PlayerSearch({
     } finally {
       setLoading(false);
     }
-  }, [eventId, allPlayers.length]);
+  }, [eventId]);
 
   useEffect(() => {
     loadPlayers();
