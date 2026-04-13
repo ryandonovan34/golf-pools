@@ -101,6 +101,7 @@ export interface LeaderboardEntry {
     strokes: number; // actual or penalty strokes
     toPar: number | null;
     isWinner: boolean;
+    isDropped: boolean;
   }[];
   totalStrokes: number;
   totalToPar: number | null;

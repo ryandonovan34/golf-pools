@@ -540,9 +540,14 @@ function PoolDetailContent() {
               <h4 className="font-semibold text-gray-900 mb-1">How It Works</h4>
               <ul className="list-disc list-inside space-y-1">
                 <li>Pick <strong>one player from each tier</strong> before the first tee time.</li>
-                <li>Your pool score = the <strong>sum of total strokes</strong> from all your picked players across all 4 rounds.</li>
+                <li>Your pool score = the <strong>sum of scores</strong> from your <strong>best 4 out of 5</strong> picked players (your worst-scoring player is dropped).</li>
                 <li>The member with the <strong>lowest combined score wins</strong>.</li>
               </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-1">Drop Worst Score</h4>
+              <p>Of your 5 picked players, the one with the <strong>highest (worst) score</strong> is automatically dropped from your total. This player appears <span className="line-through opacity-40">crossed out</span> on the leaderboard.</p>
+              <p className="mt-1 text-gray-500 italic">Example: if your players score −10, −3, −3, −6, +4, the +4 is dropped and your total is −22.</p>
             </div>
             <div>
               <h4 className="font-semibold text-gray-900 mb-1">Missed Cut Penalty</h4>

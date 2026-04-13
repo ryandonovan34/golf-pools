@@ -135,11 +135,14 @@ export function PoolLeaderboard({
                 )}
               </td>
               {entry.picks.map((pick, i) => (
-                <td key={i} className="px-3 py-3">
-                  <div className="font-medium">
+                <td key={i} className={`px-3 py-3 ${pick.isDropped ? "opacity-40" : ""}`}>
+                  <div className={`font-medium ${pick.isDropped ? "line-through" : ""}`}>
                     {pick.playerName}
                     {pick.isWinner && (
                       <span className="ml-1 text-masters-gold">🏆</span>
+                    )}
+                    {pick.isDropped && (
+                      <span className="ml-1 text-xs font-normal no-underline text-gray-400 inline-block" style={{ textDecoration: "none" }}>dropped</span>
                     )}
                   </div>
                   {pick.score && (

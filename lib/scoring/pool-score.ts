@@ -58,15 +58,37 @@ export function calculateLeaderboard(
         strokes,
         toPar: score?.to_par ?? null,
         isWinner: score?.position === "1" || score?.position === "T1",
+        isDropped: false,
       };
     });
 
-    // 3-stroke bonus for each picked player who wins the tournament
-    const winnerBonus = pickDetails.filter((p) => p.isWinner).length * -3;
-    const totalStrokes = pickDetails.reduce((sum, p) => sum + p.strokes, 0) + winnerBonus;
-    const hasToPar = pickDetails.some((p) => p.toPar !== null);
+    // Drop worst score: find the pick with the highest (worst) toPar/strokes
+    if (pickDetails.length > 1) {
+      const hasToPar = pickDetails.some((p) => p.toPar !== null);
+      let worstIdx = 0;
+      let worstScore = hasToPar
+        ? (pickDetails[0].toPar ?? pickDetails[0].strokes)
+        : pickDetails[0].strokes;
+      for (let i = 1; i < pickDetails.length; i++) {
+        const score = hasToPar
+          ? (pickDetails[i].toPar ?? pickDetails[i].strokes)
+          : pickDetails[i].strokes;
+        if (score > worstScore) {
+          worstScore = score;
+          worstIdx = i;
+        }
+      }
+      pickDetails[worstIdx].isDropped = true;
+    }
+
+    const activePicks = pickDetails.filter((p) => !p.isDropped);
+
+    // 3-stroke bonus for each picked player who wins the tournament (only active picks)
+    const winnerBonus = activePicks.filter((p) => p.isWinner).length * -3;
+    const totalStrokes = activePicks.reduce((sum, p) => sum + p.strokes, 0) + winnerBonus;
+    const hasToPar = activePicks.some((p) => p.toPar !== null);
     const totalToPar = hasToPar
-      ? pickDetails.reduce((sum, p) => sum + (p.toPar ?? 0), 0) + winnerBonus
+      ? activePicks.reduce((sum, p) => sum + (p.toPar ?? 0), 0) + winnerBonus
       : null;
 
     return {
